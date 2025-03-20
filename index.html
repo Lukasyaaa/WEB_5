@@ -8,9 +8,13 @@
 </head>
 <body>
     <div class="wrapper">
-        <div class="date">
-            <div class="date__countdown">У вас Залишилося: <time>20:50</time></div>
-            <button class="date__subscribe" type="button">Підписатися</button>
+        <div class="tasks">
+            <div class="tasks__field">
+                <input class="tasks__input" type="text" placeholder="Введіть Задачу...">
+                <button class="tasks__add" type="button" disabled></button>
+            </div>
+            <ul class="tasks__list">
+            </ul>
         </div>
     </div>
     <script src="./app.js"></script>
