@@ -1,63 +1,128 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const imagesElements = document.querySelectorAll(".slider__item");
+    const today = new Date();
+    const isCorrectYear = (year) => {
+        return /^\d+$/.test(year) && parseInt(year, 10) >= today.getFullYear();
+    }
+    const isCorrectMonth = (month, year) => {
+        const parsedMonth = parseInt(month, 10);
+        return /^\d+$/.test(month) && month.length === 2 &&
+        (parsedMonth >= (today.getMonth() + 1) || year > today.getFullYear()) && parsedMonth <= 12;
+    }
+    const isDaySmaller = (day, month, year) => {
+        switch(month){
+            case 2:
+                return day <= (((year % 4 === 0 && year % 100 !== 0) || year % 400 === 0) ? 29 : 28);
+            case 1:
+            case 3:
+            case 5:
+            case 7:
+            case 8:
+            case 10:
+            case 12:
+                return day <= 31;
+            default:
+                return day <= 30;
+        }
+    }
+    const isCorrectDay = (day, month, year) => {
+        const parsedDay = parseInt(day, 10);
+        return /^\d+$/.test(day) && day.length === 2 &&
+        (parsedDay >= today.getDate() || (month > today.getMonth() + 1) || year > today.getFullYear()) &&
+        isDaySmaller(parsedDay, month, year);
+    }
+    const isCorrectHours = (hour) => {
+        const parsedHours = parseInt(hour, 10);
+        return /^\d+$/.test(hour) && hour.length === 2 && parsedHours >= today.getHours() && parsedHours < 24;
+    }
+    const isCorrectMinutes = (min, hour) => {
+        const parsedMinutes = parseInt(min, 10);
+        return /^\d+$/.test(min) && min.length === 2 && 
+        (parsedMinutes >= today.getMinutes() || hour > today.getHours()) && parsedMinutes < 60;
+    }
 
 
-    if(imagesElements.length > 2){
-        const getIdCurrentImageElement = (currentImageElement) => {
-            for(let i = 0; i < imagesElementsMassive.length; i++){
-                if(imagesElementsMassive[i] === currentImageElement){
-                    return i;
-                }
-            }
+    let date;
+    let dateParts;
+    do {
+        date = prompt("Введіть Дату у Форматі: YYYY-MM-DD: ");
+        dateParts = date.split("-");
+    } while (
+        dateParts.length !== 3 ||
+        !isCorrectYear(dateParts[0]) ||
+        !isCorrectMonth(dateParts[1], parseInt(dateParts[0])) ||
+        !isCorrectDay(dateParts[2], parseInt(dateParts[1], 0), parseInt(dateParts[0], 0))
+    );
+
+    let units;
+    let unitsParts;
+    do {
+        units = prompt("Введіть Час У Форматі: HH:MM ");
+        unitsParts = units.split(":");
+    } while (
+        unitsParts.length !== 2 || 
+        !isCorrectHours(unitsParts[0]) || !isCorrectMinutes(unitsParts[1], parseInt(unitsParts[0], 10))
+    );
+    const neededDay = new Date(date + "T" + units);
+   
+    const countdownElement = document.querySelector(".date__countdown");
+    const timeElement = document.querySelector(".date__countdown time");
+    const subscribeElement = document.querySelector(".date__subscribe");
+
+    const clickFunction = () => {
+        countdownElement.innerText = "Вітаю ви Встигли !";
+        clearInterval(intervalId);
+        subscribeElement.removeEventListener("click", clickFunction)
+    };
+    subscribeElement.addEventListener("click", clickFunction);
+
+    timeElement.dateTime = date;
+    const intervalId = setInterval(() => {
+        const diff = neededDay - new Date();
+        if(diff < 0){
+            timeElement.innerHTML = "Час Закінчився !";
+            subscribeElement.disabled = true;
+            clearInterval(intervalId);
+            return;
         }
 
 
-        const imagesElementsMassive = Array.from(imagesElements);
-        /*Позиционируем Вторую Картинку - справа, а Последнюю Слева
-        Так Как это Картинки с Которыми Пользователь будет Взаимодействовать в Первую Очередь*/
-        imagesElementsMassive[1].style.left = "100%";
-        imagesElementsMassive[imagesElementsMassive.length - 1].style.left = "-100%";
+        const diffYears = Math.floor(diff / (1000 * 60 * 60 * 24 * 365));
+        let remainingDiff = diff - diffYears * (1000 * 60 * 60 * 24 * 365);
+
+
+        const diffMonths = Math.floor(remainingDiff / (1000 * 60 * 60 * 24 * 30));
+        remainingDiff -= diffMonths * 1000 * 60 * 60 * 24 * 30;
+
+
+        const diffDays = Math.floor(remainingDiff / (1000 * 60 * 60 * 24));
+        remainingDiff -= diffDays * 1000 * 60 * 60 * 24;
+
+
+        const diffHours = Math.floor(remainingDiff / (1000 * 60 * 60));
+        remainingDiff -= diffHours * 1000 * 60 * 60;
+
+
+        const diffMinutes = Math.floor(remainingDiff / (1000 * 60));
+        remainingDiff -= diffMinutes  * 1000 * 60;
+
+
+        const diffSeconds = Math.floor(remainingDiff / 1000);
+
+
+        let diffParts = [];
+        for(const diffPart of [
+            {value: diffYears, description: "р."},
+            {value: diffMonths, description: "м."},
+            {value: diffDays, description: "д."},
+            {value: diffHours, description: "год."},
+            {value: diffMinutes, description: "хв."},
+            {value: diffSeconds, description: "сек."}
+        ]){
+            if(diffPart.value !== 0){
+                diffParts.push(diffPart.value + diffPart.description);
+            }
+        }
        
-        const nextButtonElement = document.querySelector(".slider__arrow_next");
-        const prevButtonElement = document.querySelector(".slider__arrow_prev");
-   
-        nextButtonElement.addEventListener("click", () => {
-            const currentImageElement = document.querySelector(".slider__item._current");
-            //Передаем HTML элемент, чтобы не создавать его лишний раз в функции
-            const currentImageId = getIdCurrentImageElement(currentImageElement);
-   
-            /*Располагаем Объект, что был Активным до нажатия по Клавише - Слева И
-            Делаем Его не Активным*/
-            currentImageElement.style.left = "-100%";
-            currentImageElement.classList.remove("_current");
-   
-            /*Делаем Объект, что располагался После Активного(до нажатия) - Активным*/
-            imagesElementsMassive[(currentImageId + 1) % imagesElementsMassive.length].style.left = 0;
-            imagesElementsMassive[(currentImageId + 1) % imagesElementsMassive.length].classList.add("_current");
-   
-            /*Располагаем Объект, что находился Перед Новым Активным - Справа*/
-            imagesElementsMassive[(currentImageId + 2) % imagesElementsMassive.length].style.left = "100%";
-        });
-   
-        prevButtonElement.addEventListener("click", () => {
-            const currentImageElement = document.querySelector(".slider__item._current");
-            //Передаем HTML элемент, чтобы не создавать его лишний раз в функции
-            const currentImageId = getIdCurrentImageElement(currentImageElement);
-   
-            /*Располагаем Объект, что был Активным до нажатия по Клавише - Справа И
-            Делаем Его не Активным*/
-            currentImageElement.style.left = "100%";
-            currentImageElement.classList.remove("_current");
-           
-            /*Делаем Объект, что располагался Перед Активным(до нажатия) - Активным*/
-            const newCurrentImageId = (currentImageId === 0) ? imagesElementsMassive.length - 1 : currentImageId - 1;
-            imagesElementsMassive[newCurrentImageId].style.left = 0;
-            imagesElementsMassive[newCurrentImageId].classList.add("_current");
-           
-            /*Располагаем Объект, что находился Перед Новым Активным - Слева*/
-            imagesElementsMassive[
-                (newCurrentImageId === 0) ? imagesElementsMassive.length - 1 : newCurrentImageId - 1
-            ].style.left = "-100%";
-        });
-    }
+        timeElement.innerText = diffParts.join(" ");
+    }, 1000);
 });
