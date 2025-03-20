@@ -417,3 +417,8 @@ p.response {
 	line-height:1.8em;
 	width:auto;
 }
+
+#contactform li._error input,
+#contactform li._error textarea{
+    border: 2px solid red;
+}
