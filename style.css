@@ -1,0 +1,54 @@
+*{
+    box-sizing: border-box;
+}
+ul{
+    list-style: none;
+}
+ul, button{
+    padding: 0;
+}
+button:not(:disabled){
+    border: none;
+    cursor: pointer;
+}
+body, ul, button{
+    margin: 0;
+}
+
+
+body{
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center
+}
+.wrapper{
+    width: 992px;
+    padding: 0 15px;
+}
+.date{
+    text-align: center;
+    border-radius: 30px;
+    border: #BDB76B 5px solid;
+    background-color: #FFEFD5;
+    padding: 15px 15px;
+}
+.date__countdown{
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    font-size: 32px;
+    color: #BDB76B;
+    margin-bottom: 10px;
+}
+.date__subscribe{
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    font-size: 26px;
+    color: #FFEFD5;
+
+    width: 100%;
+    border-radius: 0 0 15px 15px;
+    background-color: #BDB76B;
+    padding: 15px;
+}
+.date__subscribe:disabled{
+    opacity: 0.5;
+}
